@@ -1,158 +1,91 @@
 # OpenBuildingDesign
 
-OpenBuildingDesign is a standard for AEC that maintains the same data from design through construction to operations, with all information attached to that data throughout the building's life. Human-readable files, version control friendly, and machine-parseable so anyone can build tools on top without proprietary software or licensing.
+An open standard for building information. Plain text files that describe building elements — what they are, what they must do, and how they connect — from first design decision through the life of the building.
+
+No proprietary software. No license fee. Open in any text editor on any device.
+
+-----
 
 ## The Problem
 
-Buildings exist in disconnected representations across specification documents, 3D models, and drawing sets. When information changes in one system, manual updates are required across others. When projects transition from design to construction to operations, information is re-interpreted or re-entered rather than transferred as structured data. Facility owners receive document binders requiring manual searching rather than queryable databases.
+Every building element exists in at least three places at once — a specification document, a 3D model, and a drawing set. None of them know about each other. The knowledge connecting them lives in the head of whoever is managing the project. When that person leaves, the knowledge leaves with them.
 
-Every phase transition loses data. Information generated during design exists somewhere—emails, model properties, spec text, meeting notes. By procurement, most of it gets re-entered by someone who wasn't in the room when it was generated. By construction, it happens again. By operations, critical information about installed products, warranties, and maintenance requirements is buried in PDFs on a shelf.
+This is not a workflow problem. Every system in AEC was designed to produce a document. None were designed to share a building element’s identity across its full lifecycle.
 
-The industry cannot advance computationally while data remains locked in proprietary formats and prose paragraphs. AI cannot check code compliance against unstructured text. Automated fabrication cannot read specification intent from Word documents. Facility management systems cannot query warranties from PDF binders. The infrastructure layer must exist before the applications layer can be built.
+The result plays out the same way on every project. Information generated during design gets re-entered by procurement. Re-entered again by construction. By the time an owner takes the building, what was installed, what the warranties cover, and what needs maintenance is buried in a binder on a shelf. The information was created. It was never preserved in a form that survives a handoff.
+
+The current standards stack — MasterFormat, NCS, AIA documents — was designed for paper. Requirements and performance criteria buried in prose paragraphs cannot be automatically checked, queried by software, or preserved across phase transitions. Almost all of it is proprietary. OBD is CC0. No owner. No fee. Anyone can read it, write it, and build tools on top of it without asking permission.
+
+-----
+
+## What It Looks Like
+
+One file per element type. Plain text.
+
+```
+NAME
+8 inch CMU exterior wall
+
+PROPERTIES
+thickness 8 inches
+fire rating 2 hours
+
+MATERIALS
+CMU block
+mortar type S
+
+RELATIONSHIPS
+PART OF building envelope
+SATISFIES 2-hour fire rating requirement
+SPECIFIED IN section 04 22 00
+
+LOG
+2026-03-15   created from construction documents
+```
+
+The same file the architect creates in design is the file the contractor reads during construction, the inspector signs off against, and the facility manager queries twenty years later. The data does not reset at phase transitions. It accumulates.
+
+-----
 
 ## What OBD Provides
 
-**Persistent element identity:** Same ID from design through operations. Wall gets placed, gets an ID. Spec requirements attach to that ID. Submittal goes against that ID. Inspector signs off against that ID. Owner queries that ID 20 years later for warranty information.
+**Persistent records.** Every element type has a structured file that travels with it from design through operations. All information — requirements, materials, relationships, inspection records, warranty data — attaches to that file.
 
-**Dual taxonomy:** Physical spatial elements (walls, beams, columns, equipment) and non-physical performance requirements (code mandates, constraints, metrics, calculations) operate in the same framework.
+**Open format.** Plain text. Version controlled in git. Any program can read it. Any person can edit it. No software lock-in.
 
-**Lifecycle properties:** Permanent vs temporary elements. Continuous vs triggered enforcement. Design vs construction vs operational phase differentiation.
+**Structured requirements.** Performance criteria as typed fields, not prose paragraphs. A fire rating is a value, not a sentence. Software can read it, check it, and act on it.
 
-**Data primacy:** Structured data is the source. Documents are generated from it. Requirements are typed fields, not prose paragraphs requiring human interpretation.
+**Lifecycle continuity.** One record per element type from design through demolition. Nothing gets re-entered. Nothing gets lost in a handoff.
 
-**Open governance:** CC0 licensing for data/schema, MIT for tooling. No proprietary dependencies. Anyone can build tools that read and write this format.
+-----
 
-## AI and Automation Potential
+## Status
 
-Structured data enables what prose cannot:
+Early development. Not v1.0.
 
-**Training data:** Clean, tagged building element datasets for training construction-focused AI models. Current limitation: models train on text descriptions, not queryable element properties with verified relationships.
+What exists: file format, relationship vocabulary, initial project simulation underway.
 
-**Automated compliance checking:** Code requirements as typed fields mean AI can verify element properties against code mandates without parsing natural language. Fire rating requirement of 2 hours checks directly against wall assembly rating property.
+What is not built yet: tools to read and check files automatically, element library beyond initial samples.
 
-**Fabrication automation:** Assembly definitions with parametric relationships generate shop drawings and CNC tooling paths. Current barrier: geometric intent buried in 2D drawings requiring human interpretation.
+What is blocking v1.0: how elements are classified, how assemblies are defined.
 
-**Predictive maintenance:** Element lifecycle data with installation dates, product specifications, and warranty terms enables operational AI to predict failures and schedule maintenance before problems occur.
+All development is documented session by session in [Discussions](https://github.com/arroq/OpenBuildingDesign/discussions) — decisions made, things rejected, and open questions included. That is the right place to understand where things stand.
 
-**Carbon accounting:** Material quantities tied to embodied carbon factors at element level means automated whole-building carbon calculation. Current process: manual quantity takeoff, manual carbon factor lookup, manual calculation.
-
-This project removes the data infrastructure barrier preventing these applications. Not by building the applications—by providing the standardized data layer they all require.
-
-## Text Format
-
-Human-readable section-header based format. Version control friendly. 
-
-## Current Status
-
-**Alpha development** — not v1.0 ready
-
-**Completed:**
--
-
-**Not built:**
--
-
-**Blocking v1.0:**
-1. Spatial function taxonomy (requires IFC 4.3 investigation)
-2. Open taxonomy selection (OmniClass Table 23 recommended)
-3. Assembly composition approach (3 options, needs complex test case)
-
-## Architecture
-
-Minimal stable core inspired by open OS kernels.
-
-**Kernel defines:**
-- Element identity schema
-- Classification taxonomy
-- Typed requirement field structure
-- Cross-layer linkages
-
-**Kernel does NOT define:**
-- Document appearance
-- Visualization rendering
-- Contract language
-- Tool-specific implementations
-- Fabrication system interfaces
-
-Extension namespace mechanism allows regional/specialty forks without core modification.
-
-## Four Data Layers
-
-**Layer 1: Specification Schema**
-- Open hierarchical classification (independent of MasterFormat)
-- Requirements as typed data fields (not prose)
-- Cross-reference to UFGS public domain content
-
-**Layer 2: Drawing and Document Schema**
-- Sheets generated from spatial model + element data
-- Version control at data level (revision = diff between states)
-
-**Layer 3: Spatial Element Model** *(kernel scope)*
-- Typed spatial objects with persistent IDs
-- Minimal geometry (coordination only, not fabrication)
-- Spec section references define assembly
-- Properties attach to persistent ID throughout lifecycle
-
-**Layer 4: Asset Record**
-- Same data object from design through operations
-- Construction fields populated during build
-- Queryable database replaces document closeout
-- Warranty, maintenance, product data attached to element IDs
-
-## Target Adoption
-
-**Initial sectors:**
-- Fabrication-intensive construction (steel, precast, curtain wall)
-- Modular and systems-based building
-- Institutional owners wanting open asset data at closeout
-- Computational workflows where legacy formats inadequate
-
-**Not targeting initially:**
-- Contract layer replacement (MasterFormat stays for contracts, OBD handles data/asset management in parallel)
-- Traditional design-bid-build contracts
-
-## Roadmap
-
-**v1.0 Success Metrics:**
-- All CSI divisions represented
-- All lifecycle phases represented
-- Complex assemblies successfully defined
-- Performance requirements from actual code sections
-- External contributor creates valid element without assistance
-- Parser handles all cases
-- Visualizer scales to 100+ elements
-- IFC export pathway documented
+-----
 
 ## Contributing
 
-Contribution workflow documentation in development.
+Contribution workflow is being established. The best place to start is [Discussions](https://github.com/arroq/OpenBuildingDesign/discussions). Read the development reports, understand the open questions, and open an issue or join a discussion.
 
-Element creation requires:
-- Unique ID assignment (collision prevention mechanism pending)
-- Required sections validation
-- Reference validation (element IDs must exist)
-- Lifecycle validation (phase/duration/enforcement combinations)
-
-## Development Transparency
-
-This project is being developed with AI assistance (Claude by Anthropic) as a core development tool. Architecture decisions, documentation, and code are human-directed with AI augmentation. All development notes, decision logs, and iteration history are maintained in project files for full transparency.
-
-The use of AI in this project is intentional—demonstrating that structured data formats enable AI-assisted development while proprietary prose formats resist it. If this kernel can be built with AI assistance, so can the ecosystem tools that will use it.
+-----
 
 ## License
 
-Dual licensing:
-- **Data/Schema:** CC0-1.0 Universal (public domain dedication)
-- **Tooling Code:** MIT License
+- Data and schema: CC0-1.0 (public domain)
+- Tooling: MIT
 
-See `LICENSE.md` for details.
+-----
 
-## Why Now
+## Development
 
-Computational workflows already dominant in fabrication-intensive construction. Gap between prose specifications and machine requirements already painful. BIM adoption widespread but painful—everyone feels modeling overhead, geometry fragility, coordination burden.
-
-Open source governance models proven at scale (Linux kernel, Wikipedia, OpenStreetMap). Public domain content available (UFGS—don't need to write 27,000 specification requirements from scratch, need to reorganize and structure existing content).
-
-Technology trivial—text format, simple parser, basic validation. Complexity is governance, adoption strategy, ecosystem building.
-
-Window of opportunity: Before next proprietary standard entrenches.
+Developed with AI assistance (Claude, Anthropic). Human-directed. Every session is published in full in [Discussions](https://github.com/arroq/OpenBuildingDesign/discussions) including dead ends, rejected ideas, and unresolved questions. The development process is transparent by design.
